@@ -12,8 +12,8 @@ fn main() {
 fn app(terminal: &mut DefaultTerminal) {
     let mut app  = app::App::new();
     loop {
-        terminal.draw(|frame| ui::render(frame, &mut app));
-        match crossterm::event::read().expect("No key presserd") {
+        terminal.draw(|frame| ui::render(frame, &mut app)).expect("Error");
+        match crossterm::event::read().expect("No key pressed") {
             Event::Key(event) => {
                 if event.kind == KeyEventKind::Press {
                     match event.code {

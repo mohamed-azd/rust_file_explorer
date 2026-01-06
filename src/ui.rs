@@ -1,11 +1,22 @@
-use std::ptr::null;
-use ratatui::Frame;
-use ratatui::layout::{Alignment, Constraint, Direction, Layout};
-use ratatui::prelude::Style;
-use ratatui::widgets::{Block, BorderType, List, Padding, Paragraph, Wrap};
 use crate::app::App;
+use ratatui::layout::{Alignment, Constraint, Direction, Layout, Rect};
+use ratatui::prelude::Style;
+use ratatui::widgets::{Block, BorderType, List, Padding, Paragraph};
+use ratatui::Frame;
+use std::rc::Rc;
+
+const BLOC_PADDING: Padding = Padding::new(2, 2, 1, 1);
 
 pub fn render(frame: &mut Frame, app: &mut App) {
+
+    let (left_layout, right_layout) = build_layout(frame);
+
+    render_path_bar(frame, app, left_layout[0]);
+    render_explorer_area(frame, app, left_layout[1]);
+    render_selection_area(frame, app, right_layout[0]);
+}
+
+fn build_layout(frame: &Frame) -> (Rc<[Rect]>,  Rc<[Rect]>)  {
     let layout = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
@@ -30,19 +41,34 @@ pub fn render(frame: &mut Frame, app: &mut App) {
         ])
         .split(layout[2]);
 
-    let bloc_padding = Padding::new(2, 2, 1, 1);
+    (left_layout, right_layout)
+}
 
 
+fn get_bloc(title: &str, padding: Padding) -> Block<'_> {
+    Block::bordered().border_type(BorderType::Rounded).padding(padding).title(title)
+}
+
+
+fn render_path_bar(frame: &mut Frame, app: &mut App, area: Rect) {
     let path = Paragraph::new(app.current_dir.display().to_string())
         .block(get_bloc("Path", Padding::ZERO))
         .style(Style::new().white().on_black())
         .alignment(Alignment::Left);
 
+    frame.render_widget(path, area);
+}
+
+fn render_explorer_area(frame: &mut Frame, app: &mut App, area: Rect) {
     let explorer = List::new(app.items.iter().map(|item| item.name.as_str()).collect::<Vec<_>>())
-        .block(get_bloc("Explorer", bloc_padding))
+        .block(get_bloc("Explorer", BLOC_PADDING))
         .style(Style::new().white().on_black())
         .highlight_style(Style::new().bg(ratatui::style::Color::Green));
 
+    frame.render_stateful_widget(explorer, area, &mut app.state);
+}
+
+fn render_selection_area(frame: &mut Frame, app: &mut App, area: Rect) {
     let name_selected_item;
     let type_selected_item;
     if let Some(item) = app.items.get(app.selected_item) {
@@ -54,16 +80,9 @@ pub fn render(frame: &mut Frame, app: &mut App) {
     }
 
     let selection = Paragraph::new(format!("name: {}\ntype: {}", name_selected_item, type_selected_item))
-        .block(get_bloc("Selection", bloc_padding))
+        .block(get_bloc("Selection", BLOC_PADDING))
         .style(Style::new().white().on_black())
         .alignment(Alignment::Left);
 
-    frame.render_widget(path, left_layout[0]);
-    frame.render_stateful_widget(explorer, left_layout[1], &mut app.state);
-    frame.render_widget(selection, right_layout[0]);
-}
-
-
-fn get_bloc(title: &str, padding: Padding) -> Block {
-    Block::bordered().border_type(BorderType::Rounded).padding(padding).title(title)
+    frame.render_widget(selection, area);
 }

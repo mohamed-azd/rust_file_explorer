@@ -93,16 +93,6 @@ impl App {
     }
 }
 
-impl Item {
-    pub fn new() -> Self {
-        Item {
-            name: String::new(),
-            item_type: ItemType::Directory,
-            path: PathBuf::new(),
-        }
-    }
-}
-
 impl ItemType {
     pub fn as_str(&self) -> &'static str {
         match self {
