@@ -1,0 +1,10 @@
+[package]
+name = "rust_file_explorer"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+crossterm = "0.29.0"
+image = "0.25.9"
+ratatui = "0.30.0"
+syntect = "5.3.0"
