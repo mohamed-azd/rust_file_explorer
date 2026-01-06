@@ -22,7 +22,7 @@ pub enum ItemType {
 impl App {
     pub fn new() -> Self {
         let mut app = Self {
-            current_dir: PathBuf::from("C:\\Users\\MOHA\\Documents\\Projets"),
+            current_dir: std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")),
             items: Vec::new(),
             state: ListState::default(),
             selected_item: 0,
@@ -82,6 +82,13 @@ impl App {
                 self.current_dir = item.path.clone();
                 self.load_directory()
             }
+        }
+    }
+
+    pub fn go_to_parent_directory(&mut self) {
+        if let Some(parent) = self.current_dir.parent() {
+            self.current_dir = parent.to_path_buf();
+            self.load_directory()
         }
     }
 }

@@ -29,6 +29,9 @@ fn app(terminal: &mut DefaultTerminal) {
                         KeyCode::Enter => {
                             app.open_directory()
                         }
+                        KeyCode::Esc => {
+                            app.go_to_parent_directory()
+                        }
                         _ => {}
                     }
                 }
