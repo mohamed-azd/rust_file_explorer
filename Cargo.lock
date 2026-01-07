@@ -760,6 +760,9 @@ dependencies = [
 [[package]]
 name = "image_2_ascii"
 version = "0.1.0"
+dependencies = [
+ "image",
+]
 
 [[package]]
 name = "imgref"
