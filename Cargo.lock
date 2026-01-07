@@ -536,6 +536,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "explorer"
+version = "0.1.0"
+dependencies = [
+ "crossterm",
+ "image",
+ "image_2_ascii",
+ "ratatui",
+ "syntect",
+]
+
+[[package]]
 name = "exr"
 version = "1.74.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -745,6 +756,10 @@ dependencies = [
  "byteorder-lite",
  "quick-error",
 ]
+
+[[package]]
+name = "image_2_ascii"
+version = "0.1.0"
 
 [[package]]
 name = "imgref"
@@ -1670,16 +1685,6 @@ name = "rgb"
 version = "0.8.52"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c6a884d2998352bb4daf0183589aec883f16a6da1f4dde84d8e2e9a5409a1ce"
-
-[[package]]
-name = "rust_file_explorer"
-version = "0.1.0"
-dependencies = [
- "crossterm",
- "image",
- "ratatui",
- "syntect",
-]
 
 [[package]]
 name = "rustc_version"
