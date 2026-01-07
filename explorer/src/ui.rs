@@ -13,7 +13,8 @@ pub fn render(frame: &mut Frame, app: &mut App) {
 
     render_path_bar(frame, app, left_layout[0]);
     render_explorer_area(frame, app, left_layout[1]);
-    render_selection_area(frame, app, right_layout[0]);
+    render_selection_infos_area(frame, app, right_layout[0]);
+    render_selection_preview_area(frame, app, right_layout[1]);
 }
 
 fn build_layout(frame: &Frame) -> (Rc<[Rect]>,  Rc<[Rect]>)  {
@@ -37,7 +38,8 @@ fn build_layout(frame: &Frame) -> (Rc<[Rect]>,  Rc<[Rect]>)  {
     let right_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Percentage(100),
+            Constraint::Percentage(10),
+            Constraint::Percentage(90),
         ])
         .split(layout[2]);
 
@@ -68,7 +70,7 @@ fn render_explorer_area(frame: &mut Frame, app: &mut App, area: Rect) {
     frame.render_stateful_widget(explorer, area, &mut app.state);
 }
 
-fn render_selection_area(frame: &mut Frame, app: &mut App, area: Rect) {
+fn render_selection_infos_area(frame: &mut Frame, app: &mut App, area: Rect) {
     let name_selected_item;
     let type_selected_item;
     if let Some(item) = app.items.get(app.selected_item) {
@@ -80,9 +82,26 @@ fn render_selection_area(frame: &mut Frame, app: &mut App, area: Rect) {
     }
 
     let selection = Paragraph::new(format!("name: {}\ntype: {}", name_selected_item, type_selected_item))
-        .block(get_bloc("Selection", BLOC_PADDING))
+        .block(get_bloc("Infos", Padding::ZERO))
         .style(Style::new().white().on_black())
         .alignment(Alignment::Left);
 
     frame.render_widget(selection, area);
+}
+
+fn render_selection_preview_area(frame: &mut Frame, app: &mut App, area: Rect) {
+    let preview_selected_item;
+    if let Some(item) = app.items.get(app.selected_item) {
+        preview_selected_item = item.preview.as_str();
+    } else {
+        preview_selected_item = "";
+    }
+
+
+    let preview = Paragraph::new(preview_selected_item)
+        .block(get_bloc("Preview", BLOC_PADDING))
+        .style(Style::new().white().on_black())
+        .alignment(Alignment::Center);
+
+    frame.render_widget(preview, area);
 }

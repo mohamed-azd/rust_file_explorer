@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use crossterm::terminal::size;
 use ratatui::widgets::ListState;
 
 pub struct App {
@@ -12,11 +13,13 @@ pub struct Item {
     pub name: String,
     pub item_type: ItemType,
     pub path: PathBuf,
+    pub preview: String,
 }
 
 pub enum ItemType {
     Directory,
-    File
+    File,
+    Image,
 }
 
 impl App {
@@ -38,14 +41,13 @@ impl App {
         if let Ok(result) = std::fs::read_dir(&self.current_dir) {
             for entry in result {
                 if let Ok(entry) = entry {
-                    if let Ok(file_type) = entry.file_type() {
-                        let item = Item {
-                            name: entry.file_name().into_string().unwrap(),
-                            item_type: if file_type.is_dir() { ItemType::Directory } else { ItemType::File },
-                            path: entry.path(),
-                        };
-                        self.items.push(item);
-                    }
+                    let item = Item {
+                        name: entry.file_name().into_string().unwrap(),
+                        item_type: ItemType::get_item_type(&entry),
+                        path: entry.path(),
+                        preview: String::new(),
+                    };
+                    self.items.push(item);
                 }
             }
         }
@@ -58,6 +60,7 @@ impl App {
     pub fn set_selected_item(&mut self, selected_item: usize) {
         self.selected_item = selected_item;
         self.state.select(Some(selected_item));
+        self.load_current_selection()
     }
 
     pub fn select_next_item(&mut self) {
@@ -91,6 +94,29 @@ impl App {
             self.load_directory()
         }
     }
+
+    fn load_current_selection(&mut self) {
+        let image_width = self.get_available_preview_width();
+
+        if let Some(item) = self.items.get_mut(self.selected_item) {
+            if matches!(item.item_type, ItemType::Image) {
+                match image::open(&item.path) {
+                    Ok(img) => {
+                        item.preview = image_2_ascii::convert(&img, image_width);
+                    }
+                    Err(_) => {}
+                }
+            }
+        }
+    }
+
+    fn get_available_preview_width(&mut self) -> u32 {
+        if let Ok(size) = size() {
+            (size.0 as f32 * 0.50) as u32
+        } else {
+            100
+        }
+    }
 }
 
 impl ItemType {
@@ -98,6 +124,24 @@ impl ItemType {
         match self {
             ItemType::Directory => "directory",
             ItemType::File => "file",
+            ItemType::Image => "image",
         }
+    }
+
+    pub fn get_item_type(entry: &std::fs::DirEntry) -> ItemType {
+        let file_type = entry.file_type().unwrap();
+        if file_type.is_dir() {
+            return ItemType::Directory
+        }
+
+        if let Some(extension) = entry.path().extension() {
+            if let Some(extension_str) = extension.to_str() {
+                match extension_str.to_lowercase().as_str() {
+                    "jpg" | "jpeg" | "png" | "gif" | "webp" | "ico"  => return ItemType::Image,
+                    _ => {}
+                }
+            }
+        }
+        ItemType::File
     }
 }
